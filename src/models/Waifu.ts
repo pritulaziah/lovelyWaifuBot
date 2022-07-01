@@ -19,9 +19,11 @@ export class Waifu {
 const WaifuModel = getModelForClass(Waifu)
 
 export function findWaifu(query: string, offset: number) {
-  const regexp = new RegExp(`.*${query}*.`, 'i')
+  const waifuRegexp = new RegExp(`.*${query}.*`, 'i')
 
-  return WaifuModel.find({ $or: [{ name_ru: regexp }, { name_en: regexp }] })
+  return WaifuModel.find({
+    $or: [{ name_ru: waifuRegexp }, { name_en: waifuRegexp }],
+  })
     .limit(5)
     .skip(offset)
 }
