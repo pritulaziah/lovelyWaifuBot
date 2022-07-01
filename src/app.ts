@@ -9,6 +9,7 @@ import bot from '@/helpers/bot'
 import configureI18n from '@/middlewares/configureI18n'
 import handleLanguage from '@/handlers/language'
 import i18n from '@/helpers/i18n'
+import inlineQuery from '@/handlers/inlineQuery'
 import languageMenu from '@/menus/language'
 import sendHelp from '@/handlers/help'
 import startMongo from '@/helpers/startMongo'
@@ -30,6 +31,7 @@ async function runApp() {
   // Commands
   bot.command(['help', 'start'], sendHelp)
   bot.command('language', handleLanguage)
+  bot.on('inline_query', inlineQuery)
   // Errors
   bot.catch(console.error)
   // Start bot
