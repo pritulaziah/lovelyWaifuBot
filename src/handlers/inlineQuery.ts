@@ -1,15 +1,28 @@
 import { Waifu, findWaifu } from '@/models/Waifu'
 import Context from '@/models/Context'
 import { InlineQueryResult } from 'grammy/out/platform.node'
+import { InlineKeyboard } from 'grammy'
 
-const baseUrl = 'https://shikimori.one/'
+const buildUrl = (url: string) => {
+  return `https://shikimori.one${url}`
+}
 
 const getWaifuTitle = (waifu: Waifu) => {
   return `${waifu.name_ru} / ${waifu.name_en}`
 }
 
+const createAnimeMessage = (animes: Waifu['animes']) => {
+  return animes
+    .map((anime) => `<a href="${buildUrl(anime.url)}">${anime.name_ru}</a>`)
+    .join(', ')
+}
+
 const createMessage = (waifu: Waifu) => {
-  return `<i>${getWaifuTitle(waifu)}</i>`
+  return `<b>${getWaifuTitle(
+    waifu
+  )}</b>\n\n<b>Из аниме:</b> <i>${createAnimeMessage(waifu.animes)}</i>${
+    waifu.description ? `\n\n<b>Описание:</b> <i>${waifu.description}</i>` : ''
+  }`
 }
 
 const inlineQuery = async (ctx: Context) => {
@@ -19,6 +32,8 @@ const inlineQuery = async (ctx: Context) => {
     const waifuList = await findWaifu(ctx.inlineQuery.query, offset)
 
     const result: InlineQueryResult[] = waifuList.map((waifu) => {
+      const url = buildUrl(waifu.url)
+
       return {
         type: 'article',
         id: String(waifu.id),
@@ -26,16 +41,23 @@ const inlineQuery = async (ctx: Context) => {
         input_message_content: {
           message_text: createMessage(waifu),
           parse_mode: 'HTML',
+          disable_web_page_preview: true,
         },
-        description: waifu.description,
-        thumb_url: `${baseUrl}${waifu.image}`,
-        thumb_width: 24,
-        thumb_height: 24,
+        reply_markup: new InlineKeyboard().url('Больше на shikimori', url),
+        description: waifu.description || 'Нет описания',
+        url,
+        hide_url: true,
+        thumb_url: `${buildUrl(waifu.image)}`.split('?')[0],
+        thumb_width: 48,
+        thumb_height: 48,
       }
     })
 
     const nextOffset = waifuList.length === 5 ? String(offset + 5) : ''
-    await ctx.answerInlineQuery(result, { next_offset: nextOffset })
+    await ctx.answerInlineQuery(result, {
+      next_offset: nextOffset,
+      cache_time: 100,
+    })
   }
 }
 

@@ -1,6 +1,9 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose'
 
-@modelOptions({})
+@modelOptions({
+  options: { customName: 'waifu', allowMixed: 0 },
+  schemaOptions: { collection: 'waifu' },
+})
 export class Waifu {
   @prop({ required: true, index: true, unique: true })
   id!: number
@@ -14,6 +17,8 @@ export class Waifu {
   url!: string
   @prop({ required: true })
   description!: string
+  @prop({ required: true })
+  animes!: Array<{ name_ru: string; name_en: string; url: string }>
 }
 
 const WaifuModel = getModelForClass(Waifu)
