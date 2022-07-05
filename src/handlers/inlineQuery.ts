@@ -17,11 +17,16 @@ const createAnimeMessage = (animes: Waifu['animes']) => {
     .join(', ')
 }
 
+const truncate = (str: string, n: number) =>
+  str.length > n ? str.slice(0, n - 1) + '&hellip;' : str
+
 const createMessage = (waifu: Waifu) => {
   return `<b>${getWaifuTitle(
     waifu
   )}</b>\n\n<b>Из аниме:</b> <i>${createAnimeMessage(waifu.animes)}</i>${
-    waifu.description ? `\n\n<b>Описание:</b> <i>${waifu.description}</i>` : ''
+    !!waifu.description
+      ? `\n\n<b>Описание:</b> <i>${truncate(waifu.description, 3000)}</i>`
+      : ''
   }`
 }
 
@@ -44,7 +49,7 @@ const inlineQuery = async (ctx: Context) => {
           disable_web_page_preview: true,
         },
         reply_markup: new InlineKeyboard().url('Больше на shikimori', url),
-        description: waifu.description || 'Нет описания',
+        description: truncate(waifu.description || 'Нет описания', 100),
         url,
         hide_url: true,
         thumb_url: `${buildUrl(waifu.image)}`.split('?')[0],
